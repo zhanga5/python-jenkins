@@ -123,6 +123,8 @@ BUILD_ENV_VARS = '%(folder_url)sjob/%(short_name)s/%(number)d/injectedEnvVars/ap
     '?depth=%(depth)s'
 BUILD_TEST_REPORT = '%(folder_url)sjob/%(short_name)s/%(number)d/testReport/api/json' + \
     '?depth=%(depth)s'
+BUILD_ARTIFACT = '%(folder_url)sjob/%(short_name)s/%(number)d/artifact/%(artifact)s'
+BUILD_STAGES = '%(folder_url)sjob/%(short_name)s/%(number)d/wfapi/describe/'
 DELETE_BUILD = '%(folder_url)sjob/%(short_name)s/%(number)s/doDelete'
 WIPEOUT_JOB_WORKSPACE = '%(folder_url)sjob/%(short_name)s/doWipeOutWorkspace'
 NODE_LIST = 'computer/api/json?depth=%(depth)s'
@@ -350,7 +352,8 @@ class Jenkins(object):
     def _get_encoded_params(self, params):
         for k, v in params.items():
             if k in ["name", "msg", "short_name", "from_short_name",
-                     "to_short_name", "folder_url", "from_folder_url", "to_folder_url"]:
+                     "to_short_name", "folder_url", "from_folder_url", "to_folder_url",
+                     "artifact"]:
                 params[k] = quote(v.encode('utf8'))
         return params
 
@@ -710,6 +713,59 @@ class Jenkins(object):
                 'Could not parse JSON info for job[%s] number[%d]' % (name, number))
         except NotFoundException:
             # This can happen if the test report wasn't generated for any reason
+            return None
+
+    def get_build_artifact(self, name, number, artifact):
+        """Get artifacts from job
+
+        :param name: Job name, ``str``
+        :param number: Build number, ``int``
+        :param artifact: Artifact relative path, ``str``
+        :returns: artifact to download, ``dict``
+        """
+        folder_url, short_name = self._get_job_folder(name)
+
+        try:
+            response = self.jenkins_open(requests.Request(
+                    'GET', self._build_url(BUILD_ARTIFACT, locals())))
+
+            if response:
+                return json.loads(response)
+            else:
+                raise JenkinsException('job[%s] number[%d] does not exist' % (name, number))
+        except requests.exceptions.HTTPError:
+            raise JenkinsException('job[%s] number[%d] does not exist' % (name, number))
+        except ValueError:
+            raise JenkinsException(
+                'Could not parse JSON info for job[%s] number[%d]' % (name, number))
+        except NotFoundException:
+            # This can happen if the artifact is not found
+            return None
+
+    def get_build_stages(self, name, number):
+        """Get stages info from job
+
+        :param name: Job name, ``str``
+        :param number: Build number, ``int``
+        :returns: dictionary of stages in the job, ``dict``
+        """
+        folder_url, short_name = self._get_job_folder(name)
+
+        try:
+            response = self.jenkins_open(requests.Request(
+                    'GET', self._build_url(BUILD_STAGES, locals())))
+
+            if response:
+                return json.loads(response)
+            else:
+                raise JenkinsException('job[%s] number[%d] does not exist' % (name, number))
+        except requests.exceptions.HTTPError:
+            raise JenkinsException('job[%s] number[%d] does not exist' % (name, number))
+        except ValueError:
+            raise JenkinsException(
+                'Could not parse JSON info for job[%s] number[%d]' % (name, number))
+        except NotFoundException:
+            # This can happen if this isn't a stages/pipeline job
             return None
 
     def get_queue_info(self):
