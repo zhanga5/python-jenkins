@@ -46,15 +46,15 @@ Bug report:
 
 Repository:
 
-* https://git.openstack.org/cgit/openstack/python-jenkins
+* https://opendev.org/jjb/python-jenkins
 
 Cloning:
 
-* git clone https://git.openstack.org/openstack/python-jenkins
+* git clone https://opendev.org/jjb/python-jenkins
 
 Patches are submitted via Gerrit at:
 
-* https://review.openstack.org/
+* https://review.opendev.org/#/q/project:jjb/python-jenkins
 
 Please do not submit GitHub pull requests, they will be automatically closed.
 
@@ -63,7 +63,7 @@ on Freenode's IRC network.
 
 More details on how you can contribute is available on our wiki at:
 
-* http://docs.openstack.org/infra/manual/developers.html
+* https://docs.opendev.org/opendev/infra-manual/latest/developers.html
 
 Writing a patch
 ---------------
