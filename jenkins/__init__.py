@@ -1499,7 +1499,7 @@ class Jenkins(object):
         for node in nodes:
             # the name returned is not the name to lookup when
             # dealing with master :/
-            if node['name'] == 'master':
+            if node['name'] in ['master', 'Built-In Node']:
                 node_name = '(master)'
             else:
                 node_name = node['name']
@@ -1554,6 +1554,9 @@ class Jenkins(object):
         :param depth: JSON depth, ``int``
         :returns: Dictionary of node info, ``dict``
         '''
+        if name == 'Built-In Node':
+            name = '(master)'
+
         try:
             response = self.jenkins_open(requests.Request(
                 'GET', self._build_url(NODE_INFO, locals())
