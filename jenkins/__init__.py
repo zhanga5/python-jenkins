@@ -115,6 +115,7 @@ SET_JOB_BUILD_NUMBER = '%(folder_url)sjob/%(short_name)s/nextbuildnumber/submit'
 COPY_JOB = '%(from_folder_url)screateItem?name=%(to_short_name)s&mode=copy&from=%(from_short_name)s'
 RENAME_JOB = '%(from_folder_url)sjob/%(from_short_name)s/doRename?newName=%(to_short_name)s'
 BUILD_JOB = '%(folder_url)sjob/%(short_name)s/build'
+REPLAY_BUILD = '%(folder_url)sjob/%(short_name)s/%(number)s/replay/run'
 STOP_BUILD = '%(folder_url)sjob/%(short_name)s/%(number)s/stop'
 BUILD_WITH_PARAMS_JOB = '%(folder_url)sjob/%(short_name)s/buildWithParameters'
 BUILD_INFO = '%(folder_url)sjob/%(short_name)s/%(number)s/api/json?depth=%(depth)s'
@@ -1382,6 +1383,22 @@ class Jenkins(object):
         parts = location.split('/')
         number = int(parts[-1])
         return number
+
+    def replay_build(self, name, number, jenkinsfile):
+        '''Trigger build job via replay a build
+
+        :param name: Name of Jenkins job, ``str``
+        :param number: Jenkins build number for the job, ``int``
+        :param jenkinsfile: Jenkinsfile text, ``str``
+        '''
+        folder_url, short_name = self._get_job_folder(name)
+        url = self._build_url(REPLAY_BUILD, locals())
+
+        the_data = {
+            'json': json.dumps({'mainScript': jenkinsfile}),
+        }
+
+        self.jenkins_request(requests.Request('POST', url, data=the_data))
 
     def run_script(self, script, node=None):
         '''Execute a groovy script on the jenkins master or on a node if
